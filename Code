@@ -1,0 +1,52 @@
+*** Settings ***
+Library    DatabaseLibrary
+Library    OperatingSystem
+
+
+Suite Setup    Connect To Database    pymysql    ${DBName}   ${DBUser}  ${DBPass}  ${DBHost}  ${DBPort}
+Suite Teardown    Disconnect From Database
+
+*** Variables ***
+${DBName}    sakila
+${DBUser}    root
+${DBPass}    YES
+${DBHost}    127.0.0.1
+${DBPort}    3306
+
+*** Test Cases ***
+#Create country table
+ #  ${output}=    Execute Sql String  Create table person(id integer,first_name varchar(20),last_name varchar(20))
+  # Log To Console    ${output}
+  # Should Be Equal As Strings    ${output}  None
+
+Inserting Data in person Table
+    ${output}=    Execute Sql String    Insert into person values(103,"Berra","Solmaz");
+  log to console  ${output}
+    Should Be Equal As Strings    ${output}    None
+
+
+Check Hilal record present in Person Table
+    Check If Exists In Database    select id from sakila.person where first_name= "Hilal";
+
+Check Ahmet record Not present in Person Table
+   Check If Not Exists In Database    select id from sakila.person where first_name="Ahmet";
+
+Check person table exist in my sakila database
+      Table Must Exist    person
+
+
+verify Row Count is Zero
+    row count is 0             SELECT * FROM sakila.person WHERE first_name='xyz';
+
+
+verify Row Count is Greater to Some Value
+    Row Count Is Greater Than X       SELECT * FROM sakila.person WHERE first_name= 'Hilal';     1
+
+verify Row Count is Less to Some Value
+    Row Count Is Less Than X          SELECT * FROM sakila.person WHERE first_name= 'Hilal';     5
+
+Update record in person table
+     ${output}=     Execute Sql String    Update sakila.person set first_name="Furkan" where id=103;
+     Log To Console    ${output}
+     Should Be Equal As Strings    ${output}    None
+
